@@ -1,69 +1,124 @@
-UR
-UploadReady Studio Pro
-Photo + merch editor with commands, background removal, and print-ready export.
-Fit
-Center
-Export PNG
-1. Upload image
-Drop image here
-or tap to choose photo/art
-No image loaded yet.
-2. Output preset
-Final use
-TeePublic / merch upload — 5000×5500 transparent PNGGeneral shirt print — 4500×5400 transparent PNGLocal print — 12×16 at 300 DPILocal print — 11×14 at 300 DPISquare graphic — 4000×4000Custom
-Width px
-Height px
-Apply size
-Use TeePublic unless you know the printer wants another exact size.
-3. Background remover
-Export transparent PNG
-Preview / JPG background color
-Remove white/light bg
-Restore original
-Clean transparent edge
-Background remover controls
-Removal tolerance
-Edge feather
-Edge cleanup strength
-Works best on plain white/light backgrounds. Complex hair or busy backgrounds need real AI background removal through a paid API/backend.
-
-−
-Fit
-Center
-+
-Preview BG
-Tell it what to do
-Run request
-TeePublic ready
-Center + fit
-Remove bg
-Auto polish
-Upload an image, then type a request.
-Preview
-Before
-After
-Pro tools
-Size
-Rotate
-X position
-Y position
-Brightness
-Contrast
-Saturation
-Warmth
-Opacity
-Advanced polish
-Sharpness
-Vignette
-Auto
-B/W
-Margin
-Export check
-No image loaded.
-
-Export
-Filename
-uploadready.pngDownload PNGDownload JPG
-Use PNG for TeePublic/merch. Use JPG only for flat local print files.
-Command history
-
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>UploadReady Studio Pro</title>
+<style>
+:root{--bg:#0c1018;--panel:#151c28;--panel2:#1d2738;--line:#334056;--text:#f7f9fd;--muted:#aeb8c8;--accent:#ffd23f;--good:#78f2a0;--bad:#ff6d6d;--warn:#ffc857}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{border:1px solid var(--line);background:#273449;color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer}
+button:hover{filter:brightness(1.1)}
+button.primary{background:var(--accent);color:#111;border-color:#d9b200;font-weight:900}
+button.small{font-size:12px;padding:7px 9px}
+input,select,textarea{width:100%;background:#0f1520;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px}
+input[type=range]{padding:0}input[type=color]{height:42px;padding:2px}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px}
+.app{min-height:100vh;display:grid;grid-template-rows:64px 1fr}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#111827;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:10px;align-items:center}.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--accent);color:#111;font-weight:1000}
+.brand h1{margin:0;font-size:20px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.workspace{display:grid;grid-template-columns:330px 1fr 370px;min-height:0}
+.left,.right{background:var(--panel);padding:14px;overflow:auto}.left{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line)}
+.stage{position:relative;display:flex;justify-content:center;align-items:center;overflow:auto;padding:18px;background:linear-gradient(45deg,#151b25 25%,transparent 25%),linear-gradient(-45deg,#151b25 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#151b25 75%),linear-gradient(-45deg,transparent 75%,#151b25 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}
+canvas{max-width:100%;max-height:calc(100vh - 105px);background:transparent;box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 0 1px #000}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}.card h2{font-size:15px;margin:0 0 10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.help{font-size:12px;line-height:1.35;color:var(--muted)}
+.drop{border:1.5px dashed #65748f;border-radius:18px;padding:20px;text-align:center;color:var(--muted);background:#0f1520}.drop strong{display:block;color:var(--text);margin-bottom:4px}.drop.drag{border-color:var(--accent);background:#20283a}
+.status{background:#0f1520;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:12px;color:var(--muted);white-space:pre-line;line-height:1.45}.changes{background:#0f1520;border:1px solid var(--line);border-radius:14px;padding:10px;font-size:12px;color:var(--text);line-height:1.45;min-height:110px}.changes ul{margin:8px 0 0 18px;padding:0}.changes li{margin:4px 0}.pass{color:var(--good);font-weight:900}.fail{color:var(--bad);font-weight:900}.warn{color:var(--warn);font-weight:900}
+.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.preview-box{background:#0f1520;border:1px solid var(--line);border-radius:14px;padding:8px;text-align:center}.preview-box div{color:var(--muted);font-size:12px;margin-bottom:6px}.preview-box img{width:100%;max-height:160px;object-fit:contain;background:#111;border-radius:10px}
+.toolbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:7px;background:rgba(12,16,24,.88);border:1px solid var(--line);border-radius:16px;padding:8px;backdrop-filter:blur(8px)}
+.history{max-height:140px;overflow:auto;font-size:12px;color:var(--muted)}.history div{padding:6px;border-bottom:1px solid #2a354a}
+details{background:#0f1520;border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:10px}summary{cursor:pointer;font-weight:800;font-size:13px}
+.pill{display:inline-block;margin:3px 3px 0 0;padding:5px 8px;border-radius:999px;background:#0f1520;border:1px solid var(--line);color:var(--muted);font-size:12px}
+.toast{position:absolute;top:18px;left:50%;transform:translateX(-50%);display:none;background:#0f1520;border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:0 12px 35px rgba(0,0,0,.45);font-size:13px}
+@media(max-width:1120px){.app{display:block}.workspace{display:block}.left,.right{border:0;border-bottom:1px solid var(--line)}.stage{min-height:72vh}canvas{max-height:75vh}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar"><div class="brand"><div class="logo">UR</div><div><h1>UploadReady Studio Pro</h1><p>Photo + merch editor with commands, background removal, and print-ready export.</p></div></div><div class="top-actions"><button id="topFit">Fit</button><button id="topCenter">Center</button><button class="primary" id="topExport">Export PNG</button></div></header>
+<main class="workspace">
+<aside class="left">
+<div class="card"><h2>1. Upload image</h2><div class="drop" id="drop"><strong>Drop image here</strong>or tap to choose photo/art<input id="upload" type="file" accept="image/*" style="display:none"></div><p class="help" id="fileInfo">No image loaded yet.</p></div>
+<div class="card"><h2>2. Output preset</h2><label>Final use</label><select id="preset"><option value="teepublic">TeePublic / merch upload — 5000×5500 transparent PNG</option><option value="shirt">General shirt print — 4500×5400 transparent PNG</option><option value="poster12x16">Local print — 12×16 at 300 DPI</option><option value="poster11x14">Local print — 11×14 at 300 DPI</option><option value="square">Square graphic — 4000×4000</option><option value="custom">Custom</option></select><div class="row"><div><label>Width px</label><input id="cw" type="number" value="5000"></div><div><label>Height px</label><input id="ch" type="number" value="5500"></div></div><button id="applySize">Apply size</button><p class="help">Use TeePublic unless you know the printer wants another exact size.</p></div>
+<div class="card"><h2>3. Background remover</h2><label><input id="transparent" type="checkbox" checked style="width:auto"> Export transparent PNG</label><label>Preview / JPG background color</label><input id="bgColor" type="color" value="#ffffff"><div class="row"><button id="removeLightBg">Remove white/light bg</button><button id="restoreOriginal">Restore original</button></div><button id="edgeClean" style="margin-top:8px;width:100%">Clean transparent edge</button><details><summary>Background remover controls</summary><label>Removal tolerance</label><input id="koTol" type="range" min="0" max="170" value="52"><label>Edge feather</label><input id="koFeather" type="range" min="0" max="110" value="18"><label>Edge cleanup strength</label><input id="edgeStrength" type="range" min="0" max="100" value="32"><p class="help">Works best on plain white/light backgrounds. Complex hair or busy backgrounds need real AI background removal through a paid API/backend.</p></details></div>
+</aside>
+<section class="stage"><div class="toast" id="toast"></div><canvas id="canvas" width="5000" height="5500"></canvas><div class="toolbar"><button class="small" id="zoomOut">−</button><button class="small" id="fit">Fit</button><button class="small" id="center">Center</button><button class="small" id="zoomIn">+</button><button class="small" id="togglePreviewBg">Preview BG</button></div></section>
+<aside class="right">
+<div class="card"><h2>Tell it what to do</h2><textarea id="cmd" rows="3" placeholder='Try: "make this TeePublic ready", "remove white background", "auto polish", "center and fit", "export PNG"'></textarea><button class="primary" id="runCmd">Run request</button><div class="row" style="margin-top:8px"><button class="small quick" data-cmd="make this TeePublic ready">TeePublic ready</button><button class="small quick" data-cmd="center and fit">Center + fit</button></div><div class="row" style="margin-top:8px"><button class="small quick" data-cmd="remove white background">Remove bg</button><button class="small quick" data-cmd="auto polish">Auto polish</button></div><div id="cmdStatus" class="status" style="margin-top:8px">Upload an image, then type a request.</div></div>
+<div class="card"><h2>Suggested / Applied Changes</h2><div id="changePreview" class="changes">Your requested changes will appear here after you press Run request.</div></div><div class="card"><h2>Preview</h2><div class="preview-grid"><div class="preview-box"><div>Before</div><img id="beforePreview"></div><div class="preview-box"><div>After</div><img id="afterPreview"></div></div></div>
+<div class="card"><h2>Pro tools</h2><label>Size</label><input id="scale" type="range" min="1" max="800" value="100"><label>Rotate</label><input id="rotate" type="range" min="-180" max="180" value="0"><div class="row"><div><label>X position</label><input id="posX" type="number" value="2500"></div><div><label>Y position</label><input id="posY" type="number" value="2750"></div></div><label>Brightness</label><input id="brightness" type="range" min="0" max="220" value="100"><label>Contrast</label><input id="contrast" type="range" min="0" max="240" value="100"><label>Saturation</label><input id="saturate" type="range" min="0" max="260" value="100"><label>Warmth</label><input id="warmth" type="range" min="-100" max="100" value="0"><label>Opacity</label><input id="opacity" type="range" min="0" max="100" value="100"><details><summary>Advanced polish</summary><label>Sharpness</label><input id="sharp" type="range" min="0" max="100" value="0"><label>Vignette</label><input id="vignette" type="range" min="0" max="100" value="0"><div class="row3" style="margin-top:10px"><button id="autoPolish">Auto</button><button id="bw">B/W</button><button id="safeMargin">Margin</button></div></details></div>
+<div class="card"><h2>Export check</h2><div id="checks" class="status">No image loaded.</div><div id="badges"></div></div>
+<div class="card"><h2>Export</h2><label>Filename</label><input id="filename" value="uploadready.png"><button class="primary" id="exportPng">Download PNG</button><button id="exportJpg">Download JPG</button><p class="help">Use PNG for TeePublic/merch. Use JPG only for flat local print files.</p></div>
+<div class="card"><h2>Command history</h2><div class="history" id="history"></div></div>
+</aside>
+</main>
+</div>
+<script>
+const $=id=>document.getElementById(id),canvas=$("canvas"),ctx=canvas.getContext("2d",{willReadFrequently:true});
+let originalCanvas=null,artCanvas=null,grayMode=false,previewBg=false;
+let state={x:2500,y:2750,scale:1,rot:0,opacity:1,dragging:false,lastX:0,lastY:0};
+function toast(msg){const t=$("toast");t.textContent=msg;t.style.display="block";clearTimeout(t.timer);t.timer=setTimeout(()=>t.style.display="none",1800)}
+function log(msg){const h=$("history"),d=document.createElement("div");d.textContent=new Date().toLocaleTimeString()+": "+msg;h.prepend(d)}
+function status(msg,kind=""){$("cmdStatus").innerHTML=msg;$("cmdStatus").className="status "+kind;toast(msg.replace(/<[^>]*>/g,""));log(msg.replace(/<[^>]*>/g,""))}
+function syncControls(){$("scale").value=Math.round(state.scale*100);$("rotate").value=Math.round(state.rot);$("posX").value=Math.round(state.x);$("posY").value=Math.round(state.y);$("opacity").value=Math.round(state.opacity*100)}
+function presetSize(){const m={teepublic:[5000,5500],shirt:[4500,5400],poster12x16:[3600,4800],poster11x14:[3300,4200],square:[4000,4000]},v=$("preset").value;if(m[v]){[$("cw").value,$("ch").value]=m[v]}}
+function applyCanvasSize(){canvas.width=Math.max(1,Number($("cw").value)||5000);canvas.height=Math.max(1,Number($("ch").value)||5500);state.x=canvas.width/2;state.y=canvas.height/2;if(artCanvas)fitArt(false);draw();updatePreview()}
+function loadFile(file){if(!file)return;const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{originalCanvas=document.createElement("canvas");originalCanvas.width=img.naturalWidth;originalCanvas.height=img.naturalHeight;originalCanvas.getContext("2d").drawImage(img,0,0);artCanvas=document.createElement("canvas");artCanvas.width=originalCanvas.width;artCanvas.height=originalCanvas.height;artCanvas.getContext("2d").drawImage(originalCanvas,0,0);$("beforePreview").src=originalCanvas.toDataURL("image/png");$("fileInfo").textContent=file.name+" — "+img.naturalWidth+"×"+img.naturalHeight+" px";$("filename").value=file.name.replace(/\.[^.]+$/,"")+"-uploadready.png";fitArt(false);draw();updatePreview();status("Image loaded. Try <b>make this TeePublic ready</b>.","pass");URL.revokeObjectURL(url)};img.src=url}
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);if(!$("transparent").checked||previewBg){ctx.fillStyle=$("bgColor").value;ctx.fillRect(0,0,canvas.width,canvas.height)}if(!artCanvas){updateChecks();return}ctx.save();ctx.translate(state.x,state.y);ctx.rotate(state.rot*Math.PI/180);ctx.scale(state.scale,state.scale);ctx.globalAlpha=state.opacity;ctx.filter="brightness("+$("brightness").value+"%) contrast("+$("contrast").value+"%) saturate("+(grayMode?0:$("saturate").value)+"%)";ctx.drawImage(artCanvas,-artCanvas.width/2,-artCanvas.height/2);ctx.restore();if(Number($("warmth").value)!==0)applyWarmth(Number($("warmth").value));if(Number($("sharp").value)>0)applySharpen(Number($("sharp").value)/100);if(Number($("vignette").value)>0)applyVignette(Number($("vignette").value)/100);updateChecks()}
+function updatePreview(){try{$("afterPreview").src=canvas.toDataURL("image/png")}catch(e){}}
+function fitArt(note=true){if(!artCanvas)return;state.scale=Math.min(canvas.width/artCanvas.width,canvas.height/artCanvas.height)*.86;state.x=canvas.width/2;state.y=canvas.height/2;state.rot=0;syncControls();draw();updatePreview();if(note)status("Artwork fitted to canvas.","pass")}
+function centerArt(){state.x=canvas.width/2;state.y=canvas.height/2;syncControls();draw();updatePreview()}
+function applyWarmth(value){try{const img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data,a=value/100*20;for(let i=0;i<d.length;i+=4){if(d[i+3]){d[i]=Math.max(0,Math.min(255,d[i]+a));d[i+2]=Math.max(0,Math.min(255,d[i+2]-a))}}ctx.putImageData(img,0,0)}catch(e){}}
+function applySharpen(amount){if(canvas.width*canvas.height>17000000)amount=Math.min(amount,.45);try{const w=canvas.width,h=canvas.height,src=ctx.getImageData(0,0,w,h),out=ctx.createImageData(w,h),s=src.data,o=out.data;for(let i=0;i<o.length;i++)o[i]=s[i];for(let y=1;y<h-1;y++){for(let x=1;x<w-1;x++){for(let c=0;c<3;c++){const i=(y*w+x)*4+c;o[i]=Math.max(0,Math.min(255,s[i]*(1+4*amount)-s[((y-1)*w+x)*4+c]*amount-s[((y+1)*w+x)*4+c]*amount-s[(y*w+x-1)*4+c]*amount-s[(y*w+x+1)*4+c]*amount))}}}ctx.putImageData(out,0,0)}catch(e){}}
+function applyVignette(amount){const g=ctx.createRadialGradient(canvas.width/2,canvas.height/2,Math.min(canvas.width,canvas.height)*.15,canvas.width/2,canvas.height/2,Math.max(canvas.width,canvas.height)*.62);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+amount*.55+")");ctx.save();ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore()}
+function removeLightBackground(){if(!artCanvas){status("Upload an image first.");return}const c=document.createElement("canvas");c.width=artCanvas.width;c.height=artCanvas.height;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(artCanvas,0,0);const img=x.getImageData(0,0,c.width,c.height),d=img.data,tol=Number($("koTol").value),feather=Number($("koFeather").value);for(let i=0;i<d.length;i+=4){const dist=Math.sqrt((255-d[i])**2+(255-d[i+1])**2+(255-d[i+2])**2);if(dist<tol)d[i+3]=0;else if(dist<tol+feather)d[i+3]=Math.round(d[i+3]*((dist-tol)/Math.max(1,feather)))}x.putImageData(img,0,0);artCanvas=c;$("transparent").checked=true;draw();updatePreview();status("White/light background removed.","pass")}
+function cleanTransparentEdge(){if(!artCanvas){status("Upload an image first.");return}const c=document.createElement("canvas");c.width=artCanvas.width;c.height=artCanvas.height;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(artCanvas,0,0);const img=x.getImageData(0,0,c.width,c.height),d=img.data,str=Number($("edgeStrength").value);for(let i=0;i<d.length;i+=4){if(d[i+3]>0&&d[i+3]<255)d[i+3]=Math.max(0,d[i+3]-str);if(d[i+3]<18)d[i+3]=0}x.putImageData(img,0,0);artCanvas=c;draw();updatePreview();status("Transparent edge cleaned.","pass")}
+function restoreOriginal(){if(!originalCanvas){status("No original image loaded.");return}artCanvas=document.createElement("canvas");artCanvas.width=originalCanvas.width;artCanvas.height=originalCanvas.height;artCanvas.getContext("2d").drawImage(originalCanvas,0,0);draw();updatePreview();status("Original restored.","pass")}
+function updateChecks(){if(!artCanvas){$("checks").textContent="No image loaded.";$("badges").innerHTML="";return}const w=Math.round(artCanvas.width*state.scale),h=Math.round(artCanvas.height*state.scale),cOK=canvas.width>=5000&&canvas.height>=5500,aOK=w>=1500&&h>=1995;$("checks").innerHTML="Canvas: "+canvas.width+"×"+canvas.height+" px\nPlaced artwork: "+w+"×"+h+" px\nTeePublic canvas: "+(cOK?'<span class=\"pass\">PASS</span>':'<span class=\"warn\">LOW</span>')+"\nArtwork minimum: "+(aOK?'<span class=\"pass\">PASS</span>':'<span class=\"fail\">TOO SMALL</span>')+"\nBackground: "+($("transparent").checked?'<span class=\"pass\">Transparent PNG</span>':'<span class=\"warn\">Solid</span>');$("badges").innerHTML='<span class="pill">'+(cOK?"5000×5500 ready":"Canvas below all-products size")+'</span><span class="pill">'+(aOK?"Artwork size OK":"Increase artwork size")+'</span><span class="pill">'+($("transparent").checked?"Transparency ON":"Solid background")+"</span>"}
+function exportPNG(){if(!artCanvas){status("Upload an image first.");return}draw();const a=document.createElement("a");a.download=$("filename").value||"uploadready.png";a.href=canvas.toDataURL("image/png");a.click();status("PNG exported. Check your downloads.","pass")}
+function exportJPG(){if(!artCanvas){status("Upload an image first.");return}const old=$("transparent").checked;$("transparent").checked=false;draw();const a=document.createElement("a");a.download=($("filename").value||"uploadready.jpg").replace(/\.png$/i,".jpg");a.href=canvas.toDataURL("image/jpeg",.95);a.click();$("transparent").checked=old;draw();updatePreview();status("JPG exported. Check your downloads.","pass")}
+function setControl(id,value){$(id).value=value}
+function runCommand(raw){
+const originalRequest=raw||"",q=originalRequest.toLowerCase().trim();
+$("cmd").value="";
+if(!q){status("Type a request first.");showChanges(originalRequest,[]);return}
+if(!artCanvas&&!q.includes("teepublic")&&!q.includes("poster")&&!q.includes("square")){status("Upload an image first.");showChanges(originalRequest,["No image loaded, so no edit was made."]);return}
+const actions=[],has=(...words)=>words.some(w=>q.includes(w));
+if(has("teepublic","tee public","upload ready","merch")){$("preset").value="teepublic";presetSize();applyCanvasSize();$("transparent").checked=true;actions.push("Set canvas to TeePublic 5000×5500.");actions.push("Turned transparent PNG export on.")}
+if(has("shirt","t-shirt","tshirt")){$("preset").value="shirt";presetSize();applyCanvasSize();actions.push("Set canvas to 4500×5400 shirt print size.")}
+if(has("poster","local printer","photo print")){$("preset").value="poster12x16";presetSize();applyCanvasSize();actions.push("Set canvas to 12×16 local print size at 300 DPI.")}
+if(has("square")){$("preset").value="square";presetSize();applyCanvasSize();actions.push("Set canvas to 4000×4000 square.")}
+if(has("remove background","remove white","light background","knockout","knock out","transparent background")){removeLightBackground();actions.push("Removed white/light background using tolerance and feather settings.")}
+if(has("clean edge","edge cleanup","clean transparent")){cleanTransparentEdge();actions.push("Cleaned transparent edge/fringe.")}
+if(has("fit")){fitArt(false);actions.push("Fit artwork inside the canvas.")}
+if(has("center","centre","middle")){centerArt();actions.push("Centered artwork.")}
+if(has("safe margin","margin")){state.scale*=.92;syncControls();actions.push("Reduced artwork slightly to create a safe margin.")}
+if(has("bigger","larger")){state.scale*=1.12;syncControls();actions.push("Made artwork bigger.")}
+if(has("smaller","shrink")){state.scale*=.88;syncControls();actions.push("Made artwork smaller.")}
+if(has("brighter","brighten")){setControl("brightness",Math.min(220,Number($("brightness").value)+15));actions.push("Increased brightness.")}
+if(has("darker","darken")){setControl("brightness",Math.max(0,Number($("brightness").value)-15));actions.push("Decreased brightness.")}
+if(has("contrast")){setControl("contrast",Math.min(240,Number($("contrast").value)+18));actions.push("Increased contrast.")}
+if(has("more color","saturate")){setControl("saturate",Math.min(260,Number($("saturate").value)+18));actions.push("Increased saturation/color.")}
+if(has("less color","desaturate")){setControl("saturate",Math.max(0,Number($("saturate").value)-18));actions.push("Reduced saturation/color.")}
+if(has("warmer")){setControl("warmth",Math.min(100,Number($("warmth").value)+20));actions.push("Made image warmer.")}
+if(has("cooler")){setControl("warmth",Math.max(-100,Number($("warmth").value)-20));actions.push("Made image cooler.")}
+if(has("sharpen","sharper")){setControl("sharp",Math.min(100,Number($("sharp").value)+20));actions.push("Increased sharpness.")}
+if(has("vignette")){setControl("vignette",Math.min(100,Number($("vignette").value)+25));actions.push("Added vignette effect.")}
+if(has("black and white","b/w","grayscale","greyscale")){grayMode=true;actions.push("Applied black-and-white preview.")}
+if(has("restore color")){grayMode=false;actions.push("Restored color mode.")}
+if(has("auto polish","polish","enhance","professional")){setControl("brightness",105);setControl("contrast",114);setControl("saturate",110);setControl("sharp",12);actions.push("Applied auto polish: brightness, contrast, saturation, and light sharpening.")}
+if(has("restore original","reset image")){restoreOriginal();actions.push("Restored the original uploaded image.")}
+draw();updatePreview();
+if(has("export png","download png","save png")){actions.push("Exported PNG file.");showChanges(originalRequest,actions);exportPNG();return}
+if(has("export jpg","download jpg","jpeg")){actions.push("Exported JPG file.");showChanges(originalRequest,actions);exportJPG();return}
+showChanges(originalRequest,actions);
+status(actions.length?"Done. See Suggested / Applied Changes box.":"I did not recognize that yet. Try: make TeePublic ready, remove background, center and fit, auto polish, or export PNG.",actions.length?"pass":"warn")
+}
+$("drop").onclick=()=>$("upload").click();$("upload").onchange=e=>loadFile(e.target.files[0]);["dragenter","dragover"].forEach(ev=>{$("drop").addEventListener(ev,e=>{e.preventDefault();$("drop").classList.add("drag")})});["dragleave","drop"].forEach(ev=>{$("drop").addEventListener(ev,e=>{e.preventDefault();$("drop").classList.remove("drag")})});$("drop").addEventListener("drop",e=>loadFile(e.dataTransfer.files[0]));$("preset").onchange=presetSize;$("applySize").onclick=applyCanvasSize;$("removeLightBg").onclick=removeLightBackground;$("edgeClean").onclick=cleanTransparentEdge;$("restoreOriginal").onclick=restoreOriginal;["transparent","bgColor","brightness","contrast","saturate","warmth","sharp","vignette"].forEach(id=>{$(id).addEventListener("input",()=>{draw();updatePreview()})});$("opacity").oninput=e=>{state.opacity=Number(e.target.value)/100;draw();updatePreview()};$("scale").oninput=e=>{state.scale=Number(e.target.value)/100;draw();updatePreview()};$("rotate").oninput=e=>{state.rot=Number(e.target.value);draw();updatePreview()};$("posX").oninput=e=>{state.x=Number(e.target.value);draw();updatePreview()};$("posY").oninput=e=>{state.y=Number(e.target.value);draw();updatePreview()};$("fit").onclick=$("topFit").onclick=()=>fitArt();$("center").onclick=$("topCenter").onclick=()=>{centerArt();status("Centered.","pass")};$("zoomIn").onclick=()=>{state.scale*=1.08;syncControls();draw();updatePreview()};$("zoomOut").onclick=()=>{state.scale*=.92;syncControls();draw();updatePreview()};$("togglePreviewBg").onclick=()=>{previewBg=!previewBg;draw();updatePreview()};$("autoPolish").onclick=()=>runCommand("auto polish");$("bw").onclick=()=>runCommand("black and white");$("safeMargin").onclick=()=>runCommand("safe margin");$("exportPng").onclick=$("topExport").onclick=exportPNG;$("exportJpg").onclick=exportJPG;$("runCmd").onclick=()=>runCommand($("cmd").value);$("cmd").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")runCommand($("cmd").value)});document.querySelectorAll(".quick").forEach(btn=>{btn.onclick=()=>{runCommand(btn.dataset.cmd)}});canvas.addEventListener("pointerdown",e=>{state.dragging=true;state.lastX=e.clientX;state.lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!state.dragging)return;const r=canvas.getBoundingClientRect();state.x+=(e.clientX-state.lastX)*(canvas.width/r.width);state.y+=(e.clientY-state.lastY)*(canvas.height/r.height);state.lastX=e.clientX;state.lastY=e.clientY;syncControls();draw();updatePreview()});canvas.addEventListener("pointerup",()=>{state.dragging=false});canvas.addEventListener("wheel",e=>{e.preventDefault();state.scale*=e.deltaY<0?1.05:.95;state.scale=Math.max(.01,Math.min(8,state.scale));syncControls();draw();updatePreview()},{passive:false});draw();
+</script>
+</body>
+</html>
