@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>UploadReady Easy Pro Editor</title>
+<style>
+:root{
+  --bg:#0d1017;--panel:#171c27;--panel2:#202838;--panel3:#111723;--text:#f4f6fb;--muted:#aeb8c9;
+  --accent:#ffd23f;--accent2:#75f0a0;--danger:#ff6565;--border:#30394d;--shadow:rgba(0,0,0,.42);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+header{
+  min-height:68px;padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#0e131d
+}
+.brand h1{font-size:20px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.topActions{display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid var(--border);background:#263146;color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer}
+button:hover{filter:brightness(1.08)}
+button.primary{background:var(--accent);border-color:#dfb900;color:#111;font-weight:800}
+button.good{background:#173d28;border-color:#2f8a54}
+button.danger{background:#3a1d20;border-color:#7d353a}
+button.small{font-size:12px;padding:7px 9px;border-radius:9px}
+main{height:calc(100vh - 68px);display:grid;grid-template-columns:360px 1fr 360px}
+.sidebar{background:var(--panel);border-right:1px solid var(--border);overflow:auto;padding:14px}
+.sidebar.right{border-right:0;border-left:1px solid var(--border)}
+.stageWrap{
+  position:relative;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px;
+  background:
+    linear-gradient(45deg,#171c25 25%,transparent 25%),
+    linear-gradient(-45deg,#171c25 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#171c25 75%),
+    linear-gradient(-45deg,transparent 75%,#171c25 75%);
+  background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0
+}
+canvas{max-width:100%;max-height:calc(100vh - 110px);background:transparent;box-shadow:0 10px 44px var(--shadow),0 0 0 1px #000}
+.card{background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#111;font-size:12px;font-weight:900}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px}
+input,select,textarea{width:100%;border:1px solid var(--border);background:#111723;color:var(--text);border-radius:12px;padding:10px}
+input[type=range]{padding:0} input[type=color]{height:42px;padding:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.help{font-size:12px;line-height:1.35;color:var(--muted)}
+.drop{
+  border:1.5px dashed #61708c;border-radius:16px;padding:18px;text-align:center;background:#121927;color:var(--muted)
+}
+.drop.drag{border-color:var(--accent);background:#1e2430;color:var(--text)}
+.drop strong{display:block;color:var(--text);margin-bottom:4px}
+details{background:var(--panel3);border:1px solid var(--border);border-radius:14px;margin-top:10px;padding:10px}
+summary{cursor:pointer;font-weight:700;font-size:13px}
+.status{background:#111723;border:1px solid var(--border);border-radius:14px;padding:10px;font-size:12px;color:var(--muted);white-space:pre-line;line-height:1.45}
+.pass{color:var(--accent2);font-weight:800}.fail{color:var(--danger);font-weight:800}.warn{color:#ffd36b;font-weight:800}
+.pill{display:inline-block;border:1px solid var(--border);background:#111723;border-radius:999px;padding:5px 8px;font-size:12px;color:var(--muted);margin:2px}
+.toolbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:7px;background:rgba(13,16,23,.88);border:1px solid var(--border);border-radius:16px;padding:8px;backdrop-filter:blur(8px)}
+.toast{position:absolute;top:18px;left:50%;transform:translateX(-50%);background:#111723;border:1px solid var(--border);padding:10px 14px;border-radius:12px;box-shadow:0 10px 30px var(--shadow);font-size:13px;display:none}
+@media(max-width:1120px){
+  main{display:block;height:auto}.sidebar,.sidebar.right{border:0;border-bottom:1px solid var(--border)}.stageWrap{min-height:70vh}canvas{max-height:75vh}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>UploadReady Easy Pro Editor</h1>
+    <p>Simple workflow. Pro export checks. TeePublic PNGs + local printer files.</p>
+  </div>
+  <div class="topActions">
+    <button id="quickFit">Fit Art</button>
+    <button id="quickCenter">Center</button>
+    <button class="primary" id="quickExport">Export TeePublic PNG</button>
+  </div>
+</header>
+
+<main>
+  <aside class="sidebar">
+    <div class="card">
+      <h2><span class="step">1</span>Add your image</h2>
+      <div class="drop" id="dropZone">
+        <strong>Drop image here</strong>
+        or tap to choose a file
+        <input id="upload" type="file" accept="image/*" style="display:none">
+      </div>
+      <p class="help" id="fileInfo">No image loaded yet.</p>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">2</span>Choose final use</h2>
+      <label>Output preset</label>
+      <select id="preset">
+        <option value="teepublic">TeePublic / merch upload — transparent PNG 5000×5500</option>
+        <option value="shirt">General shirt print — transparent PNG 4500×5400</option>
+        <option value="poster12x16">Photo/poster print — 12×16 at 300 DPI</option>
+        <option value="poster11x14">Photo/poster print — 11×14 at 300 DPI</option>
+        <option value="square">Square graphic — 4000×4000</option>
+        <option value="custom">Custom size</option>
+      </select>
+      <div class="row">
+        <div><label>Width px</label><input id="cw" type="number" value="5000"></div>
+        <div><label>Height px</label><input id="ch" type="number" value="5500"></div>
+      </div>
+      <button id="applyPreset">Apply size</button>
+      <p class="help">Start with TeePublic unless you are preparing a flat local-print photo.</p>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">3</span>Make background right</h2>
+      <label><input id="transparent" type="checkbox" checked style="width:auto"> Export with transparent background</label>
+      <label>Solid background / JPG color</label>
+      <input id="bgColor" type="color" value="#ffffff">
+
+      <div class="row">
+        <button id="removeLight">Remove white/light background</button>
+        <button id="restoreOriginal">Restore original</button>
+      </div>
+
+      <details>
+        <summary>Advanced knockout settings</summary>
+        <label>Background tolerance</label><input id="koTol" type="range" min="0" max="140" value="45">
+        <label>Edge feather</label><input id="koFeather" type="range" min="0" max="80" value="14">
+        <p class="help">Works best when the image has a plain white or very light background.</p>
+      </details>
+    </div>
+  </aside>
+
+  <section class="stageWrap">
+    <div class="toast" id="toast"></div>
+    <canvas id="canvas" width="5000" height="5500"></canvas>
+    <div class="toolbar">
+      <button class="small" id="zoomOut">−</button>
+      <button class="small" id="fit">Fit</button>
+      <button class="small" id="center">Center</button>
+      <button class="small" id="zoomIn">+</button>
+      <button class="small" id="toggleBg">Preview BG</button>
+    </div>
+  </section>
+
+  <aside class="sidebar right">
+
+    <div class="card">
+      <h2>Tell it what to do</h2>
+      <textarea id="commandBox" rows="3" placeholder='Try: "make this TeePublic ready", "remove white background", "center and fit", "make it brighter", "export PNG"'></textarea>
+      <button class="primary" id="runCommand">Run request</button>
+      <div id="commandHelp" class="help" style="margin-top:8px">
+        Examples: remove background, fit image, center it, make brighter, more contrast, black and white, restore original, export png, export jpg, add safe margin.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Adjust artwork</h2>
+      <label>Size</label><input id="scale" type="range" min="1" max="600" value="100">
+      <label>Rotate</label><input id="rotate" type="range" min="-180" max="180" value="0">
+      <div class="row">
+        <div><label>X position</label><input id="posX" type="number" value="2500"></div>
+        <div><label>Y position</label><input id="posY" type="number" value="2750"></div>
+      </div>
+      <div class="row3" style="margin-top:10px">
+        <button id="nudgeLeft">←</button><button id="nudgeUp">↑</button><button id="nudgeRight">→</button>
+        <button id="nudgeDown">↓</button><button id="reset">Reset</button><button id="duplicateSafe">Safe Margin</button>
+      </div>
+      <p class="help">Drag the art directly. Mouse wheel or trackpad scroll zooms.</p>
+    </div>
+
+    <div class="card">
+      <h2>Photo polish</h2>
+      <label>Brightness</label><input id="brightness" type="range" min="0" max="200" value="100">
+      <label>Contrast</label><input id="contrast" type="range" min="0" max="220" value="100">
+      <label>Saturation</label><input id="saturate" type="range" min="0" max="240" value="100">
+      <label>Warmth</label><input id="warmth" type="range" min="-100" max="100" value="0">
+      <label>Opacity</label><input id="opacity" type="range" min="0" max="100" value="100">
+      <details>
+        <summary>Advanced tools</summary>
+        <label>Light sharpening</label><input id="sharp" type="range" min="0" max="100" value="0">
+        <div class="row" style="margin-top:10px">
+          <button id="autoPolish">Auto polish</button>
+          <button id="grayScale">B/W Preview</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Export checks</h2>
+      <div id="checks" class="status">Load an image to begin.</div>
+      <div id="badges"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">4</span>Export</h2>
+      <label>Filename</label>
+      <input id="filename" value="uploadready-teepublic.png">
+      <button class="primary" id="exportPng">Download transparent PNG</button>
+      <button id="exportJpg">Download JPG for local printer</button>
+      <button id="saveProject">Save project settings</button>
+      <input id="loadProject" type="file" accept=".json" style="display:none">
+      <button id="loadProjectBtn">Load project settings</button>
+      <p class="help">PNG is best for TeePublic/merch. JPG is best only when a printer wants a flat photo file.</p>
+    </div>
+  </aside>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const canvas=$('canvas'), ctx=canvas.getContext('2d',{willReadFrequently:true});
+let originalCanvas=null, imgCanvas=null, gray=false, previewBg=false;
+let state={x:2500,y:2750,scale:1,rot:0,opacity:1,drag:false,lastX:0,lastY:0};
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',1900)}
+function sync(){ $('scale').value=Math.round(state.scale*100);$('rotate').value=state.rot;$('posX').value=Math.round(state.x);$('posY').value=Math.round(state.y);$('opacity').value=Math.round(state.opacity*100)}
+function presetSize(){
+  const map={teepublic:[5000,5500],shirt:[4500,5400],poster12x16:[3600,4800],poster11x14:[3300,4200],square:[4000,4000]};
+  const v=$('preset').value;if(map[v]){[$('cw').value,$('ch').value]=map[v]}
+}
+function applySize(){
+  canvas.width=Math.max(1,+$('cw').value||5000);canvas.height=Math.max(1,+$('ch').value||5500);
+  state.x=canvas.width/2;state.y=canvas.height/2;if(imgCanvas) fit(); else draw()
+}
+function fit(){
+  if(!imgCanvas) return;
+  const margin=.86;
+  state.scale=Math.min(canvas.width/imgCanvas.width,canvas.height/imgCanvas.height)*margin;
+  state.x=canvas.width/2;state.y=canvas.height/2;state.rot=0;sync();draw();toast('Artwork fitted to canvas')
+}
+function center(){state.x=canvas.width/2;state.y=canvas.height/2;sync();draw()}
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!$('transparent').checked || previewBg){ctx.fillStyle=$('bgColor').value;ctx.fillRect(0,0,canvas.width,canvas.height)}
+  if(imgCanvas){
+    ctx.save();ctx.translate(state.x,state.y);ctx.rotate(state.rot*Math.PI/180);ctx.scale(state.scale,state.scale);ctx.globalAlpha=state.opacity;
+    const b=$('brightness').value,c=$('contrast').value,s=$('saturate').value;
+    ctx.filter=`brightness(${b}%) contrast(${c}%) saturate(${gray?0:s}%)`;
+    ctx.drawImage(imgCanvas,-imgCanvas.width/2,-imgCanvas.height/2);ctx.restore();
+    if(+$('warmth').value!==0) applyWarmth(+$('warmth').value);
+    if(+$('sharp').value>0) sharpen(+$('sharp').value/100);
+  }
+  updateChecks()
+}
+function applyWarmth(v){
+  try{const im=ctx.getImageData(0,0,canvas.width,canvas.height),d=im.data,amt=v/100*18;
+  for(let i=0;i<d.length;i+=4){if(d[i+3]){d[i]=Math.max(0,Math.min(255,d[i]+amt));d[i+2]=Math.max(0,Math.min(255,d[i+2]-amt))}}ctx.putImageData(im,0,0)}catch(e){}
+}
+function sharpen(amount){
+  if(canvas.width*canvas.height>18000000 && amount>.5){amount=.5}
+  try{const w=canvas.width,h=canvas.height,src=ctx.getImageData(0,0,w,h),out=ctx.createImageData(w,h),s=src.data,o=out.data;
+  for(let i=0;i<o.length;i++)o[i]=s[i];
+  for(let y=1;y<h-1;y++){for(let x=1;x<w-1;x++){for(let c=0;c<3;c++){let i=(y*w+x)*4+c;
+  o[i]=Math.max(0,Math.min(255,s[i]*(1+4*amount)-s[((y-1)*w+x)*4+c]*amount-s[((y+1)*w+x)*4+c]*amount-s[(y*w+x-1)*4+c]*amount-s[(y*w+x+1)*4+c]*amount))}}}
+  ctx.putImageData(out,0,0)}catch(e){}
+}
+function updateChecks(){
+  if(!imgCanvas){$('checks').textContent='Load an image to begin.';$('badges').innerHTML='';return}
+  const placedW=Math.round(imgCanvas.width*state.scale), placedH=Math.round(imgCanvas.height*state.scale);
+  const tpCanvas=canvas.width>=5000&&canvas.height>=5500, tpArt=placedW>=1500&&placedH>=1995;
+  const transparent=$('transparent').checked;
+  $('checks').innerHTML=
+`Canvas: ${canvas.width}×${canvas.height}px
+Placed artwork: ${placedW}×${placedH}px
+TeePublic canvas: ${tpCanvas?'<span class="pass">PASS</span>':'<span class="warn">LOW</span>'}
+TeePublic artwork minimum: ${tpArt?'<span class="pass">PASS</span>':'<span class="fail">TOO SMALL</span>'}
+Background: ${transparent?'<span class="pass">Transparent-capable PNG</span>':'<span class="warn">Solid/flat export</span>'}`;
+  $('badges').innerHTML=[
+    tpCanvas?'<span class="pill">5000×5500 ready</span>':'<span class="pill">Canvas below TeePublic all-products size</span>',
+    tpArt?'<span class="pill">Artwork size OK</span>':'<span class="pill">Increase artwork size</span>',
+    transparent?'<span class="pill">PNG transparency on</span>':'<span class="pill">Solid background on</span>'
+  ].join('');
+}
+function setImageFromFile(file){
+  if(!file) return;
+  const url=URL.createObjectURL(file), im=new Image();
+  im.onload=()=>{originalCanvas=document.createElement('canvas');originalCanvas.width=im.naturalWidth;originalCanvas.height=im.naturalHeight;
+    originalCanvas.getContext('2d').drawImage(im,0,0);imgCanvas=document.createElement('canvas');imgCanvas.width=im.naturalWidth;imgCanvas.height=im.naturalHeight;
+    imgCanvas.getContext('2d').drawImage(originalCanvas,0,0);
+    $('fileInfo').textContent=`${file.name} — ${im.naturalWidth}×${im.naturalHeight}px`;
+    $('filename').value=file.name.replace(/\.[^.]+$/,'')+'-uploadready.png';
+    fit();URL.revokeObjectURL(url)}
+  im.src=url
+}
+$('dropZone').onclick=()=>$('upload').click();
+$('upload').onchange=e=>setImageFromFile(e.target.files[0]);
+['dragenter','dragover'].forEach(ev=>$('dropZone').addEventListener(ev,e=>{e.preventDefault();$('dropZone').classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>$('dropZone').addEventListener(ev,e=>{e.preventDefault();$('dropZone').classList.remove('drag')}));
+$('dropZone').addEventListener('drop',e=>setImageFromFile(e.dataTransfer.files[0]));
+
+$('preset').onchange=presetSize;$('applyPreset').onclick=applySize;
+['transparent','bgColor','brightness','contrast','saturate','warmth','sharp'].forEach(id=>$(id).addEventListener('input',draw));
+$('opacity').oninput=e=>{state.opacity=+e.target.value/100;draw()};
+$('scale').oninput=e=>{state.scale=+e.target.value/100;draw()};$('rotate').oninput=e=>{state.rot=+e.target.value;draw()};
+$('posX').oninput=e=>{state.x=+e.target.value;draw()};$('posY').oninput=e=>{state.y=+e.target.value;draw()};
+$('fit').onclick=$('quickFit').onclick=fit;$('center').onclick=$('quickCenter').onclick=()=>{center();toast('Centered')};
+$('zoomIn').onclick=()=>{state.scale*=1.08;sync();draw()};$('zoomOut').onclick=()=>{state.scale*=.92;sync();draw()};
+$('toggleBg').onclick=()=>{previewBg=!previewBg;draw();toast(previewBg?'Preview background on':'Preview background off')};
+$('reset').onclick=()=>{['brightness','contrast','saturate','opacity','scale'].forEach(id=>$(id).value=100);['rotate','warmth','sharp'].forEach(id=>$(id).value=0);gray=false;if(originalCanvas){imgCanvas=document.createElement('canvas');imgCanvas.width=originalCanvas.width;imgCanvas.height=originalCanvas.height;imgCanvas.getContext('2d').drawImage(originalCanvas,0,0)}fit()};
+function nudge(dx,dy){state.x+=dx;state.y+=dy;sync();draw()} $('nudgeLeft').onclick=()=>nudge(-25,0);$('nudgeRight').onclick=()=>nudge(25,0);$('nudgeUp').onclick=()=>nudge(0,-25);$('nudgeDown').onclick=()=>nudge(0,25);
+$('duplicateSafe').onclick=()=>{state.scale*=.92;sync();draw();toast('Added safe margin')};
+$('autoPolish').onclick=()=>{$('brightness').value=105;$('contrast').value=112;$('saturate').value=108;$('sharp').value=12;draw();toast('Auto polish applied')};
+$('grayScale').onclick=()=>{gray=!gray;draw();toast(gray?'Black & white preview on':'Black & white preview off')};
+
+canvas.addEventListener('pointerdown',e=>{state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(!state.drag)return;const r=canvas.getBoundingClientRect();state.x+=(e.clientX-state.lastX)*(canvas.width/r.width);state.y+=(e.clientY-state.lastY)*(canvas.height/r.height);state.lastX=e.clientX;state.lastY=e.clientY;sync();draw()});
+canvas.addEventListener('pointerup',()=>state.drag=false);
+canvas.addEventListener('wheel',e=>{e.preventDefault();state.scale*=e.deltaY<0?1.05:.95;state.scale=Math.max(.01,Math.min(8,state.scale));sync();draw()},{passive:false});
+
+$('removeLight').onclick=()=>{
+  if(!imgCanvas)return;
+  const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true});c.width=imgCanvas.width;c.height=imgCanvas.height;x.drawImage(imgCanvas,0,0);
+  const im=x.getImageData(0,0,c.width,c.height),d=im.data,t=+$('koTol').value,f=+$('koFeather').value;
+  for(let i=0;i<d.length;i+=4){const dist=Math.sqrt((255-d[i])**2+(255-d[i+1])**2+(255-d[i+2])**2);if(dist<t)d[i+3]=0;else if(dist<t+f)d[i+3]=Math.round(d[i+3]*(dist-t)/Math.max(1,f))}
+  x.putImageData(im,0,0);imgCanvas=c;$('transparent').checked=true;draw();toast('Light background removed')
+};
+$('restoreOriginal').onclick=()=>{if(!originalCanvas)return;imgCanvas=document.createElement('canvas');imgCanvas.width=originalCanvas.width;imgCanvas.height=originalCanvas.height;imgCanvas.getContext('2d').drawImage(originalCanvas,0,0);draw();toast('Original restored')};
+
+function download(url,name){const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove()}
+function exportPng(){draw();download(canvas.toDataURL('image/png'),$('filename').value||'uploadready.png')}
+$('exportPng').onclick=$('quickExport').onclick=exportPng;
+$('exportJpg').onclick=()=>{const old=$('transparent').checked;$('transparent').checked=false;draw();download(canvas.toDataURL('image/jpeg',.95),($('filename').value||'uploadready.jpg').replace(/\.png$/i,'.jpg'));$('transparent').checked=old;draw()};
+$('saveProject').onclick=()=>{const data={canvas:[canvas.width,canvas.height],state,preset:$('preset').value,controls:{transparent:$('transparent').checked,bgColor:$('bgColor').value,brightness:$('brightness').value,contrast:$('contrast').value,saturate:$('saturate').value,warmth:$('warmth').value,sharp:$('sharp').value,filename:$('filename').value}};download('data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,2)),'uploadready-project.json')};
+$('loadProjectBtn').onclick=()=>$('loadProject').click();
+$('loadProject').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);canvas.width=d.canvas[0];canvas.height=d.canvas[1];$('cw').value=canvas.width;$('ch').value=canvas.height;Object.assign(state,d.state||{});Object.entries(d.controls||{}).forEach(([k,v])=>{if($(k))$(k).type==='checkbox'?$(k).checked=v:$(k).value=v});sync();draw();toast('Project settings loaded')}catch(err){toast('Could not load project')}};r.readAsText(f)};
+
+function runNaturalCommand(raw){
+  const q=(raw||'').toLowerCase().trim();
+  if(!q){toast('Type a request first');return}
+
+  let did=false;
+  function has(...words){return words.some(w=>q.includes(w))}
+  function setVal(id,val){$(id).value=val;did=true}
+
+  // Presets / output intent
+  if(has('teepublic','tee public','merch','shirt upload','upload ready')){
+    $('preset').value='teepublic'; presetSize(); applySize(); did=true;
+  } else if(has('shirt','t-shirt','tshirt')){
+    $('preset').value='shirt'; presetSize(); applySize(); did=true;
+  } else if(has('poster','photo print','local printer','print photo')){
+    $('preset').value='poster12x16'; presetSize(); applySize(); did=true;
+  } else if(has('square')){
+    $('preset').value='square'; presetSize(); applySize(); did=true;
+  }
+
+  // Background
+  if(has('remove background','knockout','knock out','transparent background','remove white','white background','light background')){
+    $('removeLight').click(); did=true;
+  }
+  if(has('transparent','transparency')){
+    $('transparent').checked=true; did=true;
+  }
+  if(has('solid background','white background on','jpg background')){
+    $('transparent').checked=false; did=true;
+  }
+
+  // Position / size
+  if(has('fit','fill canvas','fit art','fit image')){fit();did=true}
+  if(has('center','centre','middle')){center();did=true}
+  if(has('safe margin','margin','smaller','shrink')){state.scale*=.92;sync();did=true}
+  if(has('bigger','larger','increase size','scale up')){state.scale*=1.12;sync();did=true}
+  if(has('smaller','reduce size','scale down')){state.scale*=.88;sync();did=true}
+  if(has('rotate left')){state.rot-=15;sync();did=true}
+  if(has('rotate right')){state.rot+=15;sync();did=true}
+
+  // Photo edits
+  if(has('auto polish','polish','enhance','make it pop','professional')){
+    $('autoPolish').click(); did=true;
+  }
+  if(has('brighter','brighten','more bright')){
+    setVal('brightness', Math.min(200,+$('brightness').value+15));
+  }
+  if(has('darker','darken')){
+    setVal('brightness', Math.max(0,+$('brightness').value-15));
+  }
+  if(has('more contrast','increase contrast')){
+    setVal('contrast', Math.min(220,+$('contrast').value+18));
+  }
+  if(has('less contrast','reduce contrast')){
+    setVal('contrast', Math.max(0,+$('contrast').value-18));
+  }
+  if(has('more color','more saturated','increase saturation','saturate')){
+    setVal('saturate', Math.min(240,+$('saturate').value+18));
+  }
+  if(has('less color','desaturate','less saturated')){
+    setVal('saturate', Math.max(0,+$('saturate').value-18));
+  }
+  if(has('warmer','warm it')){
+    setVal('warmth', Math.min(100,+$('warmth').value+20));
+  }
+  if(has('cooler','cool it')){
+    setVal('warmth', Math.max(-100,+$('warmth').value-20));
+  }
+  if(has('sharpen','sharper')){
+    setVal('sharp', Math.min(100,+$('sharp').value+18));
+  }
+  if(has('black and white','black & white','b/w','grayscale','greyscale')){
+    gray=true; did=true;
+  }
+  if(has('color again','restore color')){
+    gray=false; did=true;
+  }
+  if(has('restore original','start over','reset image')){
+    $('restoreOriginal').click(); did=true;
+  }
+  if(has('reset everything','full reset')){
+    $('reset').click(); did=true;
+  }
+
+  // Export
+  if(has('export png','download png','save png')){
+    exportPng(); did=true; toast('PNG exported');
+    return;
+  }
+  if(has('export jpg','download jpg','jpeg','save jpg')){
+    $('exportJpg').click(); did=true; toast('JPG exported');
+    return;
+  }
+
+  draw();
+  toast(did ? 'Request applied' : 'I did not recognize that request yet');
+}
+
+$('runCommand').onclick=()=>runNaturalCommand($('commandBox').value);
+$('commandBox').addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey) && e.key==='Enter') runNaturalCommand($('commandBox').value);
+});
+
+draw();
+</script>
+</body>
+</html>
